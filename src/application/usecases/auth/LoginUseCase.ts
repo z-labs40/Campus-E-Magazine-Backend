@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { IUserRepository } from "../../interfaces/IUserRepository";
 import { config } from "../../../config";
-import { UnauthorizedError } from "../../../shared/error";
+import { UnauthorizedError, ForbiddenError } from "../../../shared/error";
 
 export class LoginUseCase {
   constructor(private userRepository: IUserRepository) {}
@@ -20,6 +20,11 @@ export class LoginUseCase {
       throw new UnauthorizedError("Invalid email or password");
     }
 
+    // Block inactive accounts (e.g. deactivated Co-Admins)
+    if (user.status === "inactive") {
+      throw new ForbiddenError("You don't have permission. Please contact the Admin.");
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, role: user.role },
       config.jwt.secret,
@@ -33,6 +38,7 @@ export class LoginUseCase {
         email: user.email,
         name: user.name,
         role: user.role,
+        status: user.status,
       },
     };
   }

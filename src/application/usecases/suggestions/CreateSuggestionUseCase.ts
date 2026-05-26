@@ -71,6 +71,11 @@ export class CreateSuggestionUseCase {
       suggestionId: created.id,
     });
 
+    // Promote reader → author when they first contribute an edit
+    if (user.role === "reader") {
+      await this.userRepository.update(user.id, { role: "author" });
+    }
+
     return { id: created.id };
   }
 }

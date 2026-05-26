@@ -25,4 +25,19 @@ export class UserImpl implements IUserRepository {
   async findByRole(role: UserRole): Promise<User[]> {
     return this.repository.find({ where: { role } });
   }
+
+  async findAllCoAdmins(): Promise<User[]> {
+    return this.repository.find({ where: { role: "co-admin" }, order: { createdAt: "DESC" } });
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await this.repository.delete(id);
+  }
+
+  async update(id: string, data: Partial<User>): Promise<User> {
+    await this.repository.update(id, data);
+    const updated = await this.findById(id);
+    if (!updated) throw new Error("User not found after update");
+    return updated;
+  }
 }

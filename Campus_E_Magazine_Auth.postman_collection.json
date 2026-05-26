@@ -1,0 +1,123 @@
+{
+  "info": {
+    "_postman_id": "8c6b75c3-37a5-4ef5-8c01-70bf525ba32c",
+    "name": "Campus E-Magazine API",
+    "description": "Full API collection: Auth + Admin + Co-Admin CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Aria Chen\",\n  \"email\": \"aria.chen@campus.edu\",\n  \"password\": \"password123\",\n  \"role\": \"reader\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data && json.data.token) { pm.collectionVariables.set('token', json.data.token); }"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"aria.chen@campus.edu\",\n  \"password\": \"password123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+            "description": "On success, the token is automatically saved to the `token` collection variable."
+          }
+        },
+        {
+          "name": "Forgot Password (Request OTP)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"aria.chen@campus.edu\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/forgot-password", "host": ["{{base_url}}"], "path": ["auth", "forgot-password"] }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"aria.chen@campus.edu\",\n  \"code\": \"123456\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/verify-otp", "host": ["{{base_url}}"], "path": ["auth", "verify-otp"] }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"aria.chen@campus.edu\",\n  \"code\": \"123456\",\n  \"newPassword\": \"newpassword123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/reset-password", "host": ["{{base_url}}"], "path": ["auth", "reset-password"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin — Co-Admin Management",
+      "description": "All routes require Admin JWT. Login as admin first to populate the `token` variable.",
+      "item": [
+        {
+          "name": "List All Co-Admins",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/admin/co-admins", "host": ["{{base_url}}"], "path": ["admin", "co-admins"] },
+            "description": "Returns a list of all co-admin accounts with their status."
+          }
+        },
+        {
+          "name": "Create Co-Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Marcus Thompson\",\n  \"email\": \"marcus.t@campus.edu\",\n  \"password\": \"coadmin123\"\n}" },
+            "url": { "raw": "{{base_url}}/admin/co-admins", "host": ["{{base_url}}"], "path": ["admin", "co-admins"] },
+            "description": "Creates a new co-admin account with `status: active` by default."
+          }
+        },
+        {
+          "name": "Update Co-Admin (Name & Email)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Marcus T. Updated\",\n  \"email\": \"marcus.updated@campus.edu\"\n}" },
+            "url": { "raw": "{{base_url}}/admin/co-admins/:id", "host": ["{{base_url}}"], "path": ["admin", "co-admins", ":id"], "variable": [{ "key": "id", "value": "REPLACE_WITH_CO_ADMIN_ID" }] }
+          }
+        },
+        {
+          "name": "Toggle Co-Admin Status (Active ↔ Inactive)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/admin/co-admins/:id/status", "host": ["{{base_url}}"], "path": ["admin", "co-admins", ":id", "status"], "variable": [{ "key": "id", "value": "REPLACE_WITH_CO_ADMIN_ID" }] },
+            "description": "Toggles between active and inactive. Inactive co-admins cannot log in."
+          }
+        },
+        {
+          "name": "Delete Co-Admin",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/admin/co-admins/:id", "host": ["{{base_url}}"], "path": ["admin", "co-admins", ":id"], "variable": [{ "key": "id", "value": "REPLACE_WITH_CO_ADMIN_ID" }] }
+          }
+        }
+      ]
+    }
+  ]
+}
