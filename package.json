@@ -1,0 +1,46 @@
+{
+  "name": "campus-e-magazine-backend",
+  "version": "1.0.0",
+  "description": "Campus E-Magazine Backend API",
+  "main": "dist/frameworks/server.js",
+  "scripts": {
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/frameworks/server.ts",
+    "build": "tsc",
+    "start": "node dist/frameworks/server.js",
+    "seed": "ts-node -r tsconfig-paths/register src/scripts/seed.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/z-labs40/Campus-E-Magazine-Backend.git"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "class-validator": "^0.15.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.0",
+    "multer": "^2.1.1",
+    "pg": "^8.21.0",
+    "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.1",
+    "ts-node": "^10.9.2",
+    "typeorm": "^0.3.20",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.9",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^25.9.1",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.6.3"
+  }
+}
