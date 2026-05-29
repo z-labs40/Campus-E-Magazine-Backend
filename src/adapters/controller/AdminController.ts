@@ -10,6 +10,8 @@ import { MergeEditionUseCase } from "../../application/usecases/admin/MergeEditi
 import { RejectEditionSuggestionsUseCase } from "../../application/usecases/admin/RejectEditionSuggestionsUseCase";
 import { GetAdminStatsUseCase } from "../../application/usecases/admin/GetAdminStatsUseCase";
 import { CreateAdminUseCase } from "../../application/usecases/admin/CreateAdminUseCase";
+import { PublishDraftUseCase } from "../../application/usecases/admin/PublishDraftUseCase";
+import { RejectDraftUseCase } from "../../application/usecases/admin/RejectDraftUseCase";
 import { CreateCoAdminUseCase } from "../../application/usecases/admin/CreateCoAdminUseCase";
 import { ListCoAdminsUseCase } from "../../application/usecases/admin/ListCoAdminsUseCase";
 import { UpdateCoAdminUseCase } from "../../application/usecases/admin/UpdateCoAdminUseCase";
@@ -41,6 +43,8 @@ export class AdminController {
     this.router.get("/suggestions/:editionId", ...adminAndCoAdmin, this.suggestionsHandler.bind(this));
     this.router.post("/merge/:editionId", ...adminAndCoAdmin, this.mergeHandler.bind(this));
     this.router.post("/reject/:editionId", ...adminAndCoAdmin, this.rejectHandler.bind(this));
+    this.router.patch("/publish/:editionId", ...adminAndCoAdmin, this.publishDraftHandler.bind(this));
+    this.router.patch("/reject-draft/:editionId", ...adminAndCoAdmin, this.rejectDraftHandler.bind(this));
     this.router.post("/create-admin", ...adminOnly, this.createAdminHandler.bind(this));
 
     // Co-Admin CRUD (admin-only management)
@@ -103,6 +107,27 @@ export class AdminController {
     }
   }
 
+  async publishDraftHandler(req: Request, res: Response, next: any) {
+    try {
+      const usecase = new PublishDraftUseCase(this.magazineRepository);
+      const result = await usecase.execute(req.params.editionId as string);
+      res.status(200).json({ ok: true, data: result } as SuccessResponse<typeof result>);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async rejectDraftHandler(req: Request, res: Response, next: any) {
+    try {
+      const { reason } = req.body;
+      const usecase = new RejectDraftUseCase(this.magazineRepository, this.notificationRepository);
+      const result = await usecase.execute(req.params.editionId as string, reason);
+      res.status(200).json({ ok: true, data: result } as SuccessResponse<typeof result>);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async createAdminHandler(req: Request, res: Response, next: any) {
     try {
       const { email, password, name } = req.body;
@@ -128,10 +153,16 @@ export class AdminController {
 
   async createCoAdminHandler(req: Request, res: Response, next: any) {
     try {
-      const { name, email, password } = req.body;
+      const { name, email } = req.body;
       const usecase = new CreateCoAdminUseCase(this.userRepository);
-      const result = await usecase.execute(name, email, password);
-      res.status(201).json({ ok: true, data: result, message: "Co-Admin created successfully" } as SuccessResponse<typeof result>);
+      const result = await usecase.execute(name, email);
+      res
+        .status(201)
+        .json({
+          ok: true,
+          data: result,
+          message: "Co-Admin created successfully. Welcome email sent.",
+        } as SuccessResponse<typeof result>);
     } catch (error) {
       next(error);
     }

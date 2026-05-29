@@ -16,6 +16,10 @@ export class GetMagazineByIdUseCase {
       coverImage: magazine.coverImage,
       content: magazine.content,
       status: magazine.status,
+      createdById: magazine.createdById,
+      createdBy: magazine.createdBy
+        ? { id: magazine.createdBy.id, name: magazine.createdBy.name }
+        : undefined,
       createdAt: magazine.createdAt,
       updatedAt: magazine.updatedAt,
     };

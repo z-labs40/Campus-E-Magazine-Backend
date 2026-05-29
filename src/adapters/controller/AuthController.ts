@@ -6,8 +6,11 @@ import { RegisterUseCase } from "../../application/usecases/auth/RegisterUseCase
 import { ForgotPasswordUseCase } from "../../application/usecases/auth/ForgotPasswordUseCase";
 import { VerifyOtpUseCase } from "../../application/usecases/auth/VerifyOtpUseCase";
 import { ResetPasswordUseCase } from "../../application/usecases/auth/ResetPasswordUseCase";
+import { BecomeAuthorUseCase } from "../../application/usecases/auth/BecomeAuthorUseCase";
+import { ChangePasswordUseCase } from "../../application/usecases/auth/ChangePasswordUseCase";
 import { SuccessResponse } from "../../frameworks/types";
 import { UserRole } from "../models/User";
+import { authMiddleware } from "../../frameworks/middleware";
 
 export class AuthController {
   public router: Router = Router();
@@ -20,6 +23,8 @@ export class AuthController {
     this.router.post("/forgot-password", this.forgotPasswordHandler.bind(this));
     this.router.post("/verify-otp", this.verifyOtpHandler.bind(this));
     this.router.post("/reset-password", this.resetPasswordHandler.bind(this));
+    this.router.patch("/become-author", authMiddleware, this.becomeAuthorHandler.bind(this));
+    this.router.patch("/change-password", authMiddleware, this.changePasswordHandler.bind(this));
   }
 
   async loginHandler(req: Request, res: Response, next: any) {
@@ -96,6 +101,36 @@ export class AuthController {
       const { email, code, token, newPassword } = req.body;
       const usecase = new ResetPasswordUseCase(this.userRepository);
       const result = await usecase.execute(email, code, token, newPassword);
+
+      res.status(200).json({
+        ok: true,
+        data: result,
+        message: result.message,
+      } as SuccessResponse<typeof result>);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async becomeAuthorHandler(req: any, res: Response, next: any) {
+    try {
+      const usecase = new BecomeAuthorUseCase(this.userRepository);
+      const result = await usecase.execute(req.user.id);
+      res.status(200).json({
+        ok: true,
+        data: result,
+        message: "Role upgraded to Author",
+      } as SuccessResponse<typeof result>);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async changePasswordHandler(req: any, res: Response, next: any) {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const usecase = new ChangePasswordUseCase(this.userRepository);
+      const result = await usecase.execute(req.user.id, currentPassword, newPassword);
 
       res.status(200).json({
         ok: true,

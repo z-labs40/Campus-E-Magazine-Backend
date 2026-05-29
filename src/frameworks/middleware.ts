@@ -9,6 +9,26 @@ import {
 import { Logger } from "../shared/logger";
 import { FailureResponse } from "./types";
 
+export const optionalAuthMiddleware = (
+  req: any,
+  _res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, config.jwt.secret) as any;
+    req.user = decoded;
+  } catch {
+    // Ignore invalid token for optional auth
+  }
+  next();
+};
+
 export const authMiddleware = (
   req: any,
   res: Response,

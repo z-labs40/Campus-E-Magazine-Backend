@@ -9,7 +9,11 @@ import {
 } from "typeorm";
 import { User } from "./User";
 
-export type MagazineStatus = "draft" | "published" | "suggestions_pending";
+export type MagazineStatus =
+  | "draft"
+  | "pending_review"
+  | "published"
+  | "suggestions_pending";
 
 @Entity("magazines")
 export class Magazine {
@@ -27,8 +31,8 @@ export class Magazine {
 
   @Column({
     type: "enum",
-    enum: ["draft", "published", "suggestions_pending"],
-    default: "published",
+    enum: ["draft", "pending_review", "published", "suggestions_pending"],
+    default: "draft",
   })
   status!: MagazineStatus;
 

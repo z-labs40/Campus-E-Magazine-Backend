@@ -18,7 +18,7 @@ export class CreateMagazineUseCase {
       title: title.trim(),
       content,
       coverImage,
-      status: "published",
+      status: "draft",
       createdById,
     });
 

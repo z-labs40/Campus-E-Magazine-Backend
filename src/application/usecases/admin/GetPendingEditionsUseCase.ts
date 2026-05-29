@@ -8,9 +8,11 @@ export class GetPendingEditionsUseCase {
   ) {}
 
   async execute() {
-    const editions = await this.magazineRepository.findByStatus(
-      "suggestions_pending"
-    );
+    const [pendingReview, suggestionsPending] = await Promise.all([
+      this.magazineRepository.findByStatus("pending_review"),
+      this.magazineRepository.findByStatus("suggestions_pending"),
+    ]);
+    const editions = [...pendingReview, ...suggestionsPending];
 
     return Promise.all(
       editions.map(async (edition) => {

@@ -20,8 +20,35 @@ export class MagazineImpl implements IMagazineRepository {
     });
   }
 
+  async findListForUser(userId?: string): Promise<Magazine[]> {
+    if (!userId) {
+      return this.repository.find({
+        where: [{ status: "published" }, { status: "suggestions_pending" }],
+        relations: ["createdBy"],
+        order: { createdAt: "DESC" },
+      });
+    }
+
+    return this.repository
+      .createQueryBuilder("m")
+      .leftJoinAndSelect("m.createdBy", "createdBy")
+      .where(
+        "(m.status IN (:...publicStatuses)) OR (m.createdById = :userId AND m.status IN (:...ownStatuses))",
+        {
+          publicStatuses: ["published", "suggestions_pending"],
+          ownStatuses: ["draft", "pending_review"],
+          userId,
+        }
+      )
+      .orderBy("m.createdAt", "DESC")
+      .getMany();
+  }
+
   async findById(id: string): Promise<Magazine | null> {
-    return this.repository.findOne({ where: { id } });
+    return this.repository.findOne({
+      where: { id },
+      relations: ["createdBy"],
+    });
   }
 
   async findByStatus(status: MagazineStatus): Promise<Magazine[]> {
